@@ -1,0 +1,303 @@
+/* General Body Styles */
+body {
+    font-family: "Arial", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #0056b3;
+    color: white;
+    padding: 25px 20px;
+    display: flex;
+    justify-content: space-between;  /* Use space-between to separate left and right content */
+    align-items: center;
+}
+
+/* Nobel Numbat Logo Title */
+.navbar h1 {
+    font-size: 3.2rem !important; /* Slightly reduced font size */
+    font-weight: bold;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: white; /* Ensure the text color is white */
+}
+
+/* Navigation links */
+.navbar ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar li {
+    margin: 0 15px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+/* Left-aligned User Info */
+.navbar .user-info {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 80px;
+    background-color: #e9ecef;
+    color: black;
+    border-radius: 8px;
+    margin: 0 auto;
+    width: 90%;
+    max-width: 1000px;
+}
+
+.hero h2 {
+    font-size: 2.5rem; /* Slightly larger */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+/* Search Form */
+.hero .search-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.hero .search-form input {
+    padding: 10px;
+    font-size: 1rem;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    color: #0056b3;
+}
+
+.hero .search-form button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hero .search-form button:hover {
+    background-color: #218838;
+}
+
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: space-between;
+    padding: 50px 10%;
+    margin-top: 40px;
+    gap: 20px;
+}
+
+.feature-box {
+    background-color: white;
+    padding: 30px 40px;  /* Increased padding for better spacing */
+    border-radius: 12px;
+    width: 24%;  /* Increased width for larger boxes */
+    text-align: center;
+    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #ddd;
+}
+
+.feature-box h3 {
+    font-size: 1.8rem; /* Slightly larger font size for the heading */
+    margin-bottom: 15px;
+}
+
+.feature-box p {
+    font-size: 1.2rem; /* Increased font size for better readability */
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.feature-box a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1.1rem;  /* Slightly larger font size for the link */
+}
+
+.feature-box a:hover {
+    text-decoration: underline;
+}
+
+.feature-box:hover {
+    transform: scale(1.05);
+    box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    font-size: 1rem;
+    margin-top: 40px;
+}
+
+/* Enhanced Login and Register Page Styles */
+.login-container, .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.login-box, .register-box {
+    background-color: white;
+    padding: 40px 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.login-box h2, .register-box h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.login-form, .register-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 1rem;
+    color: #333;
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    color: #0056b3;
+}
+
+.form-control:focus {
+    border-color: #0056b3;
+    outline: none;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+}
+
+p {
+    font-size: 1rem;
+    color: #555;
+}
+
+a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    font-size: 1rem;
+    margin-top: 40px;
+}
+
+/* Ensure the map container fills the page */
+    #map {
+        height: 600px; /* Increase height */
+        width: 100%;
+        margin-top: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        background: #ddd; /* Ensure a visible background */
+    }
+
+    /* Prevent overflow issues */
+    .leaflet-container {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+
+<style>
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+.styled-table thead tr {
+    background-color: #0056b3;
+    color: #fff;
+    text-align: left;
+}
+.styled-table th,
+.styled-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.styled-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+</style>
