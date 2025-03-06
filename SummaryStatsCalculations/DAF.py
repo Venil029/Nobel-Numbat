@@ -1,14 +1,15 @@
+#import pandas for handling data and re module for pattern matching
 import pandas as pd
 import re
 
-# 📂 Load the CSV dataset
-file_path = r"C:\Users\VISHNU BELLIAPPA\Downloads\FINAL.csv"  # Update with your file path
+# Load the dataset from final csv
+file_path = r"final.csv"  
 df = pd.read_csv(file_path)
 
-# 🔹 Clean column names (remove spaces)
+# clean the column names by removing white spaces
 df.columns = [col.strip().replace(" ", "_") for col in df.columns]
 
-# 🔹 Function to extract allele frequencies from formatted strings
+# extract the allele frequency from the table format
 def extract_frequency(allele_freq_str, allele):
     """Extracts the frequency of a given allele from a formatted string like 'A: 0.802, G: 0.198'."""
     try:
@@ -17,7 +18,7 @@ def extract_frequency(allele_freq_str, allele):
     except:
         return None
 
-# 🎯 Function to Compute Derived Allele Frequency (DAF) for BEB and PJL
+# function to calculate derived allele frequency for BEB and PJL populations
 def calculate_daf(row):
     try:
         derived_allele = row["Risk_Allele"]  # Risk allele is considered derived
@@ -31,16 +32,13 @@ def calculate_daf(row):
         print(f"Error processing SNP {row['SNP_ID']}: {e}")
         return None, None
 
-# 🔹 Apply DAF calculation function separately for BEB and PJL
+# apply calculation for each row
 df["DAF_BEB"], df["DAF_PJL"] = zip(*df.apply(calculate_daf, axis=1))
 
-# 🛠 Save Updated File
-output_path = r"C:\Users\VISHNU BELLIAPPA\Downloads\FINAL_with_DAF_BEB_PJL.csv"
+# save the calculations to csv file format
+output_path = r"FINAL_with_DAF_BEB_PJL.csv"
 df.to_csv(output_path, index=False)
 
-# ✅ Print the first few rows to verify the results
+# print the first few rows of results to check calculation has worked
 print(df[["SNP_ID", "Risk_Allele", "DAF_BEB", "DAF_PJL"]].head())
 
-# ✅ Display confirmation message
-print(f"✅ Derived Allele Frequency (DAF) calculations completed successfully.")
-print(f"📂 Updated file saved at: {output_path}")
