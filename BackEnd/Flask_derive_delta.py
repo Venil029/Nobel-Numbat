@@ -1,3 +1,5 @@
+#import os to handle file paths, pandas to handle structured data, re to extract allele frequency data, matplotlib for plotting, 
+#seaborn for statistical plots, io for in memory files, base64 to encode plots in website and sqlite3 to connect to database for queries
 import os
 import pandas as pd
 import re
@@ -7,20 +9,18 @@ import io
 import base64
 import sqlite3
 
-# Use the same database path as your app:
+# connect to the database
 db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "instance", "genetics.db")
-conn = sqlite3.connect(db_path)
+conn = sqlite3.connect(db_path)#open connection to SQLite database
 
-# IMPORTANT: Use lowercase "snp" in the query
+# load SNP data from database
 query = "SELECT * FROM snp"
 df = pd.read_sql_query(query, conn)
 conn.close()
 
-# Clean column names: remove spaces, replace with underscores, and convert to lowercase
+# clean column
 df.columns = [col.strip().replace(" ", "_").lower() for col in df.columns]
-# Expected columns: snp_id, risk_allele, chromosome, position, p_value, odds_ratio, ci, trait, mapped_gene,
-# study_accession, pubmed_id, beb, pjl, reference, ancestral, delta_af, daf_beb, daf_pjl, phenotype, t2dkp_p_value, beta
-
+#extract allele frequency data
 def extract_frequency(allele_freq_str, allele):
     """
     Extracts the frequency of a given allele from a formatted string like 'A: 0.802, G: 0.198'.
@@ -32,7 +32,7 @@ def extract_frequency(allele_freq_str, allele):
     except Exception as e:
         print(f"Error extracting frequency: {e}")
         return None
-
+#function to compute derived allele frequency 
 def calculate_daf(row):
     """
     Computes the Derived Allele Frequency (DAF) for beb and pjl populations.
@@ -60,11 +60,11 @@ df.loc[df["daf_beb"].isna() | df["daf_pjl"].isna(), "delta_af"] = None
 chromosome_order = [str(i) for i in range(1, 23)] + ["X", "Y"]
 df["chromosome"] = df["chromosome"].astype(str).str.strip()
 df["chromosome"] = pd.Categorical(df["chromosome"], categories=chromosome_order, ordered=True)
-
+#function to return processed data
 def get_processed_data():
     """Returns the processed DataFrame."""
     return df
-
+#function to plot histogram 
 def plot_daf_histogram(df):
     df_filtered = df.dropna(subset=["daf_beb", "daf_pjl"])
     df_aggregated = df_filtered.groupby("chromosome").agg(
@@ -83,7 +83,7 @@ def plot_daf_histogram(df):
     img.seek(0)
     plt.close()
     return base64.b64encode(img.getvalue()).decode('utf8')
-
+#fucntion to plot line chart
 def plot_daf_line_chart(df):
     df_filtered = df.dropna(subset=["daf_beb", "daf_pjl"])
     df_aggregated = df_filtered.groupby("chromosome").agg(
@@ -102,7 +102,7 @@ def plot_daf_line_chart(df):
     img.seek(0)
     plt.close()
     return base64.b64encode(img.getvalue()).decode('utf8')
-
+#function to plot bar chart
 def plot_delta_af_bar_chart(df):
     df_filtered = df.dropna(subset=["delta_af"])
     df_aggregated = df_filtered.groupby("chromosome").agg(
@@ -158,32 +158,29 @@ def plot_pvalues_by_chromosome(df):
     # Highlight and annotate SNPs with p-value < 1e-58
     significant_snps = df[df["p_value"] < 1e-58]
     if not significant_snps.empty:
-        # Highlight significant SNPs in red
         sns.stripplot(
             data=significant_snps,
             x="chromosome",
             y="p_value",
-            color="red",  # Highlight in red
+            color="red",  
             jitter=True,
-            alpha=1.0,  # Make highlighted points fully opaque
-            s=20,  # Increase size of highlighted points
+            alpha=1.0,  
+            s=20,  
             ax=ax
         )
 
-        # Annotate significant SNPs with their snp_id
+        # Annotate significant SNPs with their snp id
         for _, row in significant_snps.iterrows():
-            # Find the x-coordinate for the chromosome
             chrom_pos = chromosome_order.index(row["chromosome"])
-            # Annotate the SNP ID
             ax.text(
-                chrom_pos,  # x-coordinate (chromosome position)
-                row["p_value"],  # y-coordinate (p-value)
-                row["snp_id"],  # Text to display (snp_id)
+                chrom_pos, 
+                row["p_value"],  
+                row["snp_id"],  
                 fontsize=10,
                 color="black",
                 ha="center",
                 va="bottom",
-                bbox=dict(facecolor="yellow", alpha=0.5, edgecolor="black", boxstyle="round")  # Add a yellow background
+                bbox=dict(facecolor="yellow", alpha=0.5, edgecolor="black", boxstyle="round") 
             )
 
     # Save the plot to a BytesIO object
