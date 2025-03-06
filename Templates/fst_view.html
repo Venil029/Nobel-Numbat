@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}FST Visualisation Tool{% endblock %}
+
+{% block head_extra %}
+  <!-- Bootstrap CSS for FST view page -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Custom styles for FST view page */
+    #snp-select {
+      height: 200px;
+    }
+    /* Keep a fixed height for the chart canvas container if desired */
+    #chart-container {
+      position: relative;
+      height: 300px;
+    }
+    /* Legend container styling */
+    #legend-container {
+      margin-top: 15px;
+      padding: 10px;
+      border-top: 1px solid #eee;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #000;
+    }
+    .table th {
+      position: sticky;
+      top: 0;
+      background-color: #f8f9fa;
+      z-index: 10;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25em 0.6em;
+      font-size: 75%;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: 0.25rem;
+    }
+    @media (max-width: 768px) {
+      #chart-container {
+        height: 250px;
+      }
+      .card {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">FST Score Visualisation</h1>
+  <div class="row">
+    <!-- Controls -->
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-header">Controls</div>
+        <div class="card-body">
+          <div class="form-group mb-3">
+            <label for="population-select">Select Population:</label>
+            <select class="form-control" id="population-select">
+              <option value="" disabled selected>Select a population</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="snp-select">Select SNPs:</label>
+            <select class="form-control" id="snp-select" multiple size="10" disabled>
+              <option value="" disabled>Select a population first</option>
+            </select>
+            <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple SNPs</small>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="top-snps-checkbox">
+            <label class="form-check-label" for="top-snps-checkbox">
+              Auto-select top 10 SNPs
+            </label>
+          </div>
+          <button id="visualize-btn" class="btn btn-primary mt-3" disabled>Visualise</button>
+        </div>
+      </div>
+    </div>
+    <!-- Visualisation and Data Table -->
+    <div class="col-md-9">
+      <div class="card mb-4">
+        <div class="card-header">FST Score Visualisation</div>
+        <div class="card-body">
+          <div id="chart-container">
+            <canvas id="fst-chart"></canvas>
+          </div>
+          <!-- Separate legend container so it's not overlapped -->
+          <div id="legend-container"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">FST Data</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped" id="fst-table">
+              <thead>
+                <tr>
+                  <th>SNP ID</th>
+                  <th>Allele</th>
+                  <th>FST Score</th>
+                  <th>Genetic Differentiation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4" class="text-center">No data selected</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <!-- Bootstrap JS for FST view page -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM elements
+      const populationSelect = document.getElementById('population-select');
+      const snpSelect = document.getElementById('snp-select');
+      const visualizeBtn = document.getElementById('visualize-btn');
+      const fstTable = document.getElementById('fst-table');
+      const chartCanvas = document.getElementById('fst-chart');
+      const topSnpsCheckbox = document.getElementById('top-snps-checkbox');
+      
+      // Chart instance
+      let chartInstance = null;
+      
+      // Colors for different genetic differentiation categories
+      const categoryColors = {
+        'Little genetic diff.': 'rgba(54, 162, 235, 0.7)',
+        'Moderate genetic diff.': 'rgba(255, 206, 86, 0.7)',
+        'Great genetic diff.': 'rgba(255, 99, 132, 0.7)',
+        'Very great genetic diff.': 'rgba(153, 102, 255, 0.7)'
+      };
+      
+      // Load populations
+      fetch('/api/populations')
+        .then(response => response.json())
+        .then(populations => {
+          populations.forEach(pop => {
+            const option = document.createElement('option');
+            option.value = pop;
+            option.textContent = pop;
+            populationSelect.appendChild(option);
+          });
+          populationSelect.disabled = false;
+        })
+        .catch(error => console.error('Error loading populations:', error));
+      
+      // Population selection change handler
+      populationSelect.addEventListener('change', function() {
+        const selectedPopulation = this.value;
+        if (selectedPopulation) {
+          snpSelect.innerHTML = '';
+          snpSelect.disabled = true;
+          fetch(`/api/snps/${selectedPopulation}`)
+            .then(response => response.json())
+            .then(snps => {
+              snps.forEach(snp => {
+                const option = document.createElement('option');
+                option.value = snp;
+                option.textContent = snp;
+                snpSelect.appendChild(option);
+              });
+              snpSelect.disabled = false;
+              visualizeBtn.disabled = false;
+              if (topSnpsCheckbox.checked) {
+                loadTopSNPs(selectedPopulation);
+              }
+            })
+            .catch(error => console.error('Error loading SNPs:', error));
+        } else {
+          snpSelect.disabled = true;
+          visualizeBtn.disabled = true;
+        }
+      });
+      
+      // Checkbox for auto-selecting top SNPs
+      topSnpsCheckbox.addEventListener('change', function() {
+        const selectedPopulation = populationSelect.value;
+        if (this.checked && selectedPopulation) {
+          loadTopSNPs(selectedPopulation);
+        }
+      });
+      
+      // Function to load top SNPs for initial selection
+      function loadTopSNPs(population, count = 10) {
+        fetch(`/api/top_snps/${population}/${count}`)
+          .then(response => response.json())
+          .then(data => {
+            for (let i = 0; i < snpSelect.options.length; i++) {
+              snpSelect.options[i].selected = false;
+            }
+            const topSnpIds = data.map(item => item['SNP ID']);
+            for (let i = 0; i < snpSelect.options.length; i++) {
+              if (topSnpIds.includes(snpSelect.options[i].value)) {
+                snpSelect.options[i].selected = true;
+              }
+            }
+            visualizeSelectedSNPs();
+          })
+          .catch(error => console.error('Error loading top SNPs:', error));
+      }
+      
+      // Visualise button click handler
+      visualizeBtn.addEventListener('click', function() {
+        visualizeSelectedSNPs();
+      });
+      
+      // Function to visualise selected SNPs
+      function visualizeSelectedSNPs() {
+        const selectedPopulation = populationSelect.value;
+        const selectedSnps = Array.from(snpSelect.selectedOptions).map(option => option.value);
+        if (selectedPopulation && selectedSnps.length > 0) {
+          fetch('/api/fst_data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ population: selectedPopulation, snps: selectedSnps }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            updateVisualization(data);
+            updateTable(data);
+          })
+          .catch(error => console.error('Error fetching FST data:', error));
+        }
+      }
+      
+      // Update visualisation with data
+      function updateVisualization(data) {
+        const chartData = data.map(item => ({
+          snpId: item['SNP ID'],
+          fst: item.FST,
+          category: item.Category,
+          allele: item.Allele
+        }));
+        chartData.sort((a, b) => b.fst - a.fst);
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+        const ctx = chartCanvas.getContext('2d');
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: chartData.map(item => item.snpId),
+            datasets: [{
+              label: 'FST Score',
+              data: chartData.map(item => item.fst),
+              backgroundColor: chartData.map(item => categoryColors[item.category] || 'rgba(201, 203, 207, 0.7)'),
+              borderColor: chartData.map(item => (categoryColors[item.category] || 'rgba(201, 203, 207, 0.7)').replace('0.7', '1')),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  title: tooltipItems => `SNP: ${tooltipItems[0].label}`,
+                  afterTitle: tooltipItems => {
+                    const dataIndex = tooltipItems[0].dataIndex;
+                    return `Allele: ${chartData[dataIndex].allele}`;
+                  },
+                  afterLabel: tooltipItem => {
+                    const dataIndex = tooltipItem.dataIndex;
+                    return `Category: ${chartData[dataIndex].category}`;
+                  }
+                }
+              },
+              legend: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true, title: { display: true, text: 'FST Score' } },
+              x: { title: { display: true, text: 'SNP ID' }, ticks: { maxRotation: 45, minRotation: 45 } }
+            }
+          }
+        });
+        createCategoryLegend();
+      }
+      
+      // Create category legend in the separate container
+      function createCategoryLegend() {
+        const legendContainer = document.getElementById('legend-container');
+        legendContainer.innerHTML = ''; // clear any existing content
+        Object.entries(categoryColors).forEach(([category, color]) => {
+          const legendItem = document.createElement('div');
+          legendItem.className = 'd-flex align-items-center me-3 mb-2';
+          const colorBox = document.createElement('div');
+          colorBox.className = 'me-1';
+          colorBox.style.width = '20px';
+          colorBox.style.height = '20px';
+          colorBox.style.backgroundColor = color;
+          colorBox.style.borderRadius = '3px';
+          const categoryText = document.createElement('span');
+          categoryText.textContent = category;
+          legendItem.appendChild(colorBox);
+          legendItem.appendChild(categoryText);
+          legendContainer.appendChild(legendItem);
+        });
+      }
+      
+      // Update table with data
+      function updateTable(data) {
+        const tableBody = fstTable.querySelector('tbody');
+        tableBody.innerHTML = '';
+        data.sort((a, b) => b.FST - a.FST);
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          const snpCell = document.createElement('td'); snpCell.textContent = item['SNP ID'];
+          const alleleCell = document.createElement('td'); alleleCell.textContent = item.Allele;
+          const fstCell = document.createElement('td'); fstCell.textContent = item.FST.toFixed(4);
+          const categoryCell = document.createElement('td');
+          const categoryBadge = document.createElement('span');
+          categoryBadge.className = 'badge';
+          categoryBadge.style.backgroundColor = categoryColors[item.Category] || 'rgba(201, 203, 207, 0.7)';
+          categoryBadge.style.color = item.Category.includes('Great') ? 'white' : 'black';
+          categoryBadge.textContent = item.Category;
+          categoryCell.appendChild(categoryBadge);
+          row.appendChild(snpCell);
+          row.appendChild(alleleCell);
+          row.appendChild(fstCell);
+          row.appendChild(categoryCell);
+          tableBody.appendChild(row);
+        });
+      }
+    });
+  </script>
+{% endblock %}

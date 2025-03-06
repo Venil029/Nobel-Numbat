@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+    
+{% block title %}South Asian T2D Map{% endblock %}
+        
+{% block content %}
+
+<!-- Map Container -->
+<div id="map"></div>
+
+<!-- Include Leaflet.js -->  
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Initialize the map centered on South Asia
+    var map = L.map('map').setView([23, 80], 4.5); 
+
+    // English-only map tiles from Carto (removes non-English labels)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Load GeoJSON for South Asia (Bangladesh and Pakistan only)
+    fetch("https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson")
+        .then(response => response.json())
+        .then(data => {
+            var southAsia = ["Bangladesh", "Pakistan"];
+
+            var geojsonLayer = L.geoJson(data, {
+                filter: function (feature) {
+                    return southAsia.includes(feature.properties.name); // Only Bangladesh and Pakistan
+                },
+                style: function (feature) {
+                    return {
+                        color: "#333", // Border color
+                        weight: 0.4, // Border thickness
+                        fillColor: "transparent", // Default no color
+                        fillOpacity: 0.2
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.on({
+                        mouseover: function (e) {
+                            e.target.setStyle({
+                                fillColor: "#66b3ff", // Light blue hover effect
+                                fillOpacity: 0.7,
+                                weight: 2
+                            });
+                        },
+                        mouseout: function (e) {
+                            geojsonLayer.resetStyle(e.target); // Reset hover effect
+                        },
+                        click: function (e) {
+                            var country = feature.properties.name;
+                            window.location.href = "/populations/" + country.toLowerCase().replace(/\s+/g, "-");
+                        }
+                    });
+                }
+            }).addTo(map);
+        })
+        .catch(error => console.error("Error loading GeoJSON:", error));
+</script>
+
+<style>
+    /* Make sure the entire page is filled */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Main content wrapper */
+    .content {
+        flex-grow: 1; /* Push footer to bottom */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Map should take up most of the screen */
+    #map {
+        flex-grow: 1; /* Makes map expand */
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Footer (Grey Bar) */
+    footer {
+        height: 50px; /* Set height for footer */
+        font-size: 14px;
+        text-align: center;
+        background-color: #222;
+        color: white;
+        padding: 15px;
+        width: 100%;
+        position: relative;
+        bottom: 0;
+    }
+</style>
+
+{% endblock %}

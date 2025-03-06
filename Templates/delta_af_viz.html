@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Delta AF Visualisations{% endblock %}
+
+{% block content %}
+<div class="container" style="background: white; color: black; padding: 20px; border-radius: 10px; margin-top: 20px;">
+  <h2 style="text-align: center;">Delta AF Visualisations</h2>
+
+  <!-- Manhattan Plot -->
+  <div style="margin-top: 20px;">
+    <h3>Manhattan Plot</h3>
+    <!-- The Plotly figure is inserted here -->
+    {{ manhattan_html | safe }}
+  </div>
+
+  <!-- Box Plot -->
+  <div style="margin-top: 40px;">
+    <h3>Delta_AF Box Plot</h3>
+    <!-- The Plotly figure is inserted here -->
+    {{ boxplot_html | safe }}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Nobel Numbat{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h2>Explore Type 2 Diabetes Genetics</h2>
+    <p>Explore Information On Single Nucleotide Polymorphisms Associated With Type 2 Diabetes While Leveraging SNPs Data, 
+       Population Data and Discover Functional Insights.</p>
+    
+    <!-- Search Bar -->
+    <form class="search-form" action="/search" method="GET">
+        <input type="text" name="query" placeholder="Search SNPs..." required>
+        <button type="submit">Search</button>
+    </form>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="feature-box">
+        <h3>Genetic Data</h3>
+        <p>Retrieve information on T2D-associated SNPs by rsID, gene, or loci.</p>
+        <a href="{{ url_for('genetic_data_search') }}">Explore</a>
+    </div>
+    <div class="feature-box">
+        <h3>Populations</h3>
+        <p>View selection scores and explore population of interest.</p>
+        <a href="{{ url_for('populations') }}" class="explore-link">Explore</a>
+    </div>
+    <div class="feature-box">
+        <h3>Data</h3>
+        <p>Explore data visualisation.</p>
+        <a href="{{ url_for('data_options') }}">Explore</a>
+    </div>
+</section>
+
+<!-- Background Enhancement -->
+<style>
+    body {
+        background: url("{{ url_for('static', filename='dna_background.jpg') }}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .hero {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 50px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 50px auto;
+        width: 80%;
+    }
+    .features {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 30px;
+        border-radius: 10px;
+        width: 80%;
+        margin: auto;
+        text-align: center;
+    }
+</style>
+
+{% endblock %}

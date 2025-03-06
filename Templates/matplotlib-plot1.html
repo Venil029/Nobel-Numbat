@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Summary Stats View - Nobel Numbat{% endblock %}
+{% block content %}
+<section class="summary-stats">
+    <header class="stats-header">
+        <h1>Summary Statistics: DAF and ΔAF Visualization</h1>
+        <p>
+            Explore the visual summary of Derived Allele Frequency (DAF) for BEB and PJL populations and the absolute 
+            difference in allele frequencies (ΔAF) across chromosomes. Hover over the charts for a closer look.
+        </p>
+    </header>
+    
+    <div class="plots-grid">
+        <div class="plot-card">
+            <h2>Histogram</h2>
+            <p>Mean DAF_BEB and DAF_PJL by Chromosome</p>
+            <img src="data:image/png;base64,{{ histogram_plot }}" alt="Histogram of Mean DAF by Chromosome">
+        </div>
+        <div class="plot-card">
+            <h2>Line Chart</h2>
+            <p>Mean DAF_BEB and DAF_PJL by Chromosome (Trend)</p>
+            <img src="data:image/png;base64,{{ line_chart_plot }}" alt="Line Chart of Mean DAF by Chromosome">
+        </div>
+        <div class="plot-card">
+            <h2>Bar Chart</h2>
+            <p>Mean ΔAF by Chromosome</p>
+            <img src="data:image/png;base64,{{ delta_af_plot }}" alt="Bar Chart of Mean ΔAF by Chromosome">
+        </div>
+    </div>
+    
+    <footer class="stats-footer">
+        <p>For more detailed analysis, please refer to our documentation or contact our support team.</p>
+        <button class="cta-button" onclick="window.print()">Print This Page</button>
+    </footer>
+</section>
+
+<style>
+    .summary-stats {
+        background: #fff;
+        padding: 50px;
+        border-radius: 15px;
+        margin: 40px auto;
+        width: 95%;
+        max-width: 1200px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+    .stats-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .stats-header h1 {
+        font-size: 2.8em;
+        color: #003366;
+        margin-bottom: 10px;
+    }
+    .stats-header p {
+        font-size: 1.2em;
+        color: #555;
+    }
+    .plots-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    .plot-card {
+        background: #f8f8f8;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .plot-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .plot-card h2 {
+        font-size: 1.6em;
+        color: #0056b3;
+        margin-bottom: 5px;
+    }
+    .plot-card p {
+        font-size: 1em;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    .plot-card img {
+        width: 100%;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+    .plot-card img:hover {
+        transform: scale(1.02);
+    }
+    .stats-footer {
+        text-align: center;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+    }
+    .stats-footer p {
+        font-size: 1em;
+        color: #777;
+        margin-bottom: 15px;
+    }
+    .cta-button {
+        background-color: #0056b3;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .cta-button:hover {
+        background-color: #003366;
+    }
+    @media (max-width: 768px) {
+        .stats-header h1 {
+            font-size: 2.2em;
+        }
+        .stats-header p,
+        .stats-footer p {
+            font-size: 0.95em;
+        }
+        .plot-card h2 {
+            font-size: 1.4em;
+        }
+    }
+</style>
+{% endblock %}

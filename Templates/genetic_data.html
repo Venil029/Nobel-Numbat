@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% block title %}Genetic Data - Nobel Numbat{% endblock %}
+{% block content %}
+<section class="genetic-data">
+  <div class="container">
+    <h2 class="title">Type 2 Diabetes Genetic Data</h2>
+    <p class="description">
+      Explore the genetic variants associated with Type 2 Diabetes, including SNPs, 
+      chromosomes, allele frequencies, gene associations, and risk alleles.
+    </p>
+
+    <!-- Search Form -->
+    <form class="search-form" action="{{ url_for('genetic_data_search') }}" method="GET">
+      <input 
+        type="text" 
+        name="query" 
+        placeholder="Search by rsID, Chromosome, Gene, Position, or Risk Allele..." 
+        class="search-input"
+      >
+      <button type="submit" class="search-button">Search</button>
+    </form>
+
+    {% if results %}
+      <!-- Download Form for Selected SNPs -->
+      <form id="downloadForm" action="{{ url_for('download_selected') }}" method="POST" class="download-form">
+        <!-- Top Bar with Country Dropdown and Download/Population Buttons -->
+        <div class="download-top">
+          <label for="country" class="country-label">Download metrics for:</label>
+          <select name="country" id="country" class="country-select">
+            <option value="">None</option>
+            <option value="pakistan">Pakistan</option>
+            <option value="bangladesh">Bangladesh</option>
+          </select>
+          <button type="submit" class="download-selected-button">Download Selected</button>
+          <button type="button" id="populationButton" class="population-button">Population</button>
+        </div>
+
+        <!-- Results Table -->
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>rsID</th>
+              <th>Risk Allele</th>
+              <th>Chromosome</th>
+              <th>Position</th>
+              <th>Gene</th>
+              <th>P-value</th>
+              <th>Phenotype</th>
+              <th>T2DKP P-value</th>
+              <th>Beta</th>
+              <th>fst_beb</th>
+              <th>fst_pjl</th>
+              <th>delta_af</th>
+              <th>daf_beb</th>
+              <th>daf_pjl</th>
+              <th>Study Accession</th>
+              <th>PubMed ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in results %}
+            <tr>
+              <td><input type="checkbox" name="selected_snps" value="{{ result.snp_id }}"></td>
+              <td>
+                <a href="{{ url_for('search') }}?query={{ result.snp_id }}" class="snp-link">
+                  {{ result.snp_id }}
+                </a>
+              </td>
+              <td>{{ result.risk_allele }}</td>
+              <td>{{ result.chromosome }}</td>
+              <td>{{ result.position }}</td>
+              <td>{{ result.mapped_gene if result.mapped_gene else "N/A" }}</td>
+              <td>{{ result.p_value }}</td>
+              <td>{{ result.phenotype if result.phenotype else "N/A" }}</td>
+              <td>{{ result.t2dkp_p_value if result.t2dkp_p_value else "N/A" }}</td>
+              <td>{{ result.beta if result.beta else "N/A" }}</td>
+              <td>{{ result.fst_beb if result.fst_beb is not none else "N/A" }}</td>
+              <td>{{ result.fst_pjl if result.fst_pjl is not none else "N/A" }}</td>
+              <td>{{ result.delta_af if result.delta_af is not none else "N/A" }}</td>
+              <td>{{ result.daf_beb if result.daf_beb is not none else "N/A" }}</td>
+              <td>{{ result.daf_pjl if result.daf_pjl is not none else "N/A" }}</td>
+              <td>{{ result.study_accession }}</td>
+              <td>{{ result.pubmed_id }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </form>
+    {% else %}
+      <p class="no-results">
+        No results found for "<span class="query">{{ query }}</span>". Try another search.
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Additional Scientific Insights -->
+<section class="info-section">
+  <div class="container">
+    <h3>Understanding Genetic Variants in T2D</h3>
+    <div class="info-grid">
+      <div class="info-box">
+        <h4>rsID</h4>
+        <p>A unique identifier assigned to a SNP in the <strong>dbSNP</strong> database.</p>
+      </div>
+      <div class="info-box">
+        <h4>Risk Allele</h4>
+        <p>The allele associated with increased susceptibility to Type 2 Diabetes.</p>
+      </div>
+      <div class="info-box">
+        <h4>Chromosome &amp; Position</h4>
+        <p>Indicates the location of the SNP within the human genome.</p>
+      </div>
+      <div class="info-box">
+        <h4>Gene</h4>
+        <p>Shows the gene associated with the SNP, providing insight into potential biological functions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JavaScript for Population Button -->
+<script>
+  document.getElementById('populationButton').addEventListener('click', function() {
+    var country = document.getElementById('country').value;
+    if (!country) {
+      alert("Please select a country from the dropdown.");
+      return;
+    }
+    if (country === 'pakistan') {
+      window.location.href = "{{ url_for('pakistan') }}";
+    } else if (country === 'bangladesh') {
+      window.location.href = "{{ url_for('bangladesh') }}";
+    }
+  });
+</script>
+
+<!-- Additional styling specifically for the Genetic Data page -->
+<style>
+  .genetic-data {
+    text-align: center;
+    background: linear-gradient(to right, #e6f2ff, #d4edda);
+    padding: 40px 0;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    margin: 20px auto;
+  }
+  .title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #003366;
+    margin-bottom: 15px;
+  }
+  .description {
+    font-size: 16px;
+    color: #000;
+    margin-bottom: 25px;
+    line-height: 1.4;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .search-form {
+    margin-bottom: 25px;
+  }
+  .search-input {
+    width: 65%;
+    max-width: 450px;
+    height: 36px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 8px;
+  }
+  .search-button {
+    background-color: green;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .search-button:hover {
+    background-color: #006400;
+  }
+  .download-form {
+    text-align: left;
+    margin-bottom: 10px;
+  }
+  .download-top {
+    margin-bottom: 10px;
+  }
+  .country-label {
+    margin-right: 8px;
+    font-weight: bold;
+  }
+  .country-select {
+    padding: 5px;
+    margin-right: 8px;
+  }
+  .download-selected-button,
+  .population-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  .download-selected-button:hover,
+  .population-button:hover {
+    background-color: #0056b3;
+  }
+  .styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    font-size: 14px;
+    table-layout: fixed;
+    margin-top: 10px;
+    text-align: left;
+  }
+  .styled-table thead tr th {
+    background-color: #003366;
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .styled-table th, .styled-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .styled-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  .styled-table tr:hover {
+    background-color: #ddd;
+  }
+  /* Column widths */
+  .styled-table th:nth-child(1),
+  .styled-table td:nth-child(1) {
+    width: 50px; /* Select checkbox */
+  }
+  .styled-table th:nth-child(2),
+  .styled-table td:nth-child(2) {
+    width: 80px; /* rsID */
+  }
+  .styled-table th:nth-child(3),
+  .styled-table td:nth-child(3) {
+    width: 80px; /* Risk Allele */
+  }
+  .styled-table th:nth-child(4),
+  .styled-table td:nth-child(4) {
+    width: 60px; /* Chromosome */
+  }
+  .styled-table th:nth-child(5),
+  .styled-table td:nth-child(5) {
+    width: 70px; /* Position */
+  }
+  .styled-table th:nth-child(6),
+  .styled-table td:nth-child(6) {
+    width: 100px; /* Gene */
+  }
+  .styled-table th:nth-child(7),
+  .styled-table td:nth-child(7) {
+    width: 60px; /* P-value */
+  }
+  .styled-table th:nth-child(8),
+  .styled-table td:nth-child(8) {
+    width: 100px; /* Phenotype */
+  }
+  .styled-table th:nth-child(9),
+  .styled-table td:nth-child(9) {
+    width: 80px; /* T2DKP P-value */
+  }
+  .styled-table th:nth-child(10),
+  .styled-table td:nth-child(10) {
+    width: 50px; /* Beta */
+  }
+  .styled-table th:nth-child(11),
+  .styled-table td:nth-child(11) {
+    width: 60px; /* fst_beb */
+  }
+  .styled-table th:nth-child(12),
+  .styled-table td:nth-child(12) {
+    width: 60px; /* fst_pjl */
+  }
+  .styled-table th:nth-child(13),
+  .styled-table td:nth-child(13) {
+    width: 60px; /* delta_af */
+  }
+  .styled-table th:nth-child(14),
+  .styled-table td:nth-child(14) {
+    width: 60px; /* daf_beb */
+  }
+  .styled-table th:nth-child(15),
+  .styled-table td:nth-child(15) {
+    width: 60px; /* daf_pjl */
+  }
+  .styled-table th:nth-child(16),
+  .styled-table td:nth-child(16) {
+    width: 100px; /* Study Accession */
+  }
+  .styled-table th:nth-child(17),
+  .styled-table td:nth-child(17) {
+    width: 80px; /* PubMed ID */
+  }
+  .snp-link {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .snp-link:hover {
+    text-decoration: underline;
+    color: #ff6600;
+  }
+  .no-results {
+    font-size: 14px;
+    color: #333;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .info-section {
+    background: #fff;
+    padding: 30px 0;
+    border-radius: 12px;
+    margin: 30px auto;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
+  .info-section h3 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .info-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .info-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    flex: 1;
+    min-width: 220px;
+    max-width: 300px;
+    text-align: center;
+    margin: 10px;
+  }
+  .info-box h4 {
+    color: #000;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+</style>
+{% endblock %}

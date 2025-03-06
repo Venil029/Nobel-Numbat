@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Nobel Numbat{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <h2>Welcome, {{ current_user.username }}!</h2>
+        <p>Email: {{ current_user.email }}</p>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+</div>
+
+<style>
+    /* ✅ Profile Page Styling */
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh; /* Ensures profile stays in the center */
+    }
+
+    .profile-card {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        width: 50%;
+        max-width: 450px;
+        text-align: center;
+    }
+
+    .profile-card h2 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #0056b3;
+    }
+
+    .profile-card p {
+        font-size: 18px;
+        color: #333;
+    }
+
+    .logout-button {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        padding: 12px 20px;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+
+    .logout-button:hover {
+        background-color: #c82333;
+    }
+
+    /* ✅ Ensures footer stays at the bottom */
+    footer {
+        margin-top: auto;
+    }
+</style>
+
+{% endblock %}

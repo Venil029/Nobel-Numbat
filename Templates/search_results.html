@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - Nobel Numbat{% endblock %}
+
+{% block content %}
+<section class="search-container">
+    <div class="header">
+        <h2>Search Results for: <span class="query">{{ query }}</span></h2>
+    </div>
+
+    {% if results %}
+    <!-- SNP Results Card -->
+    <div class="card snp-results">
+        <div class="card-header">
+            <h3>SNP Results</h3>
+        </div>
+        <div class="card-body">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>rsID</th>
+                        <th>Risk Allele</th>
+                        <th>Gene</th>
+                        <th>Trait</th>
+                        <th>Phenotype</th>
+                        <th>T2DKP P-value</th>
+                        <th>Beta</th>
+                        <th>P-Value</th>
+                        <th>Odds Ratio</th>
+                        <th>Study Accession</th>
+                        <th>PubMed ID</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.snp_id }}</td>
+                        <td>{{ result.risk_allele }}</td>
+                        <td>{% if result.mapped_gene %}{{ result.mapped_gene }}{% else %}-{% endif %}</td>
+                        <td>{{ result.trait }}</td>
+                        <td>{% if result.phenotype %}{{ result.phenotype }}{% else %}-{% endif %}</td>
+                        <td>
+                          {% if result.t2dkp_p_value %}
+                            {{ result.t2dkp_p_value|float|round(3) }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if result.beta %}
+                            {{ result.beta|float|round(3) }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        </td>
+                        <td>{{ result.p_value }}</td>
+                        <td>{{ result.odds_ratio }}</td>
+                        <td>{{ result.study_accession }}</td>
+                        <td>{{ result.pubmed_id }}</td>
+                        <td>
+                            <!-- Download button toggles options -->
+                            <button class="download-button" onclick="toggleDownloadOptions('{{ result.snp_id }}')">
+                                Download
+                            </button>
+                            <div id="options-{{ result.snp_id }}" class="download-options" style="display:none;">
+                                <a href="{{ url_for('download_snp', snp_id=result.snp_id) }}?country=pakistan" class="download-button">
+                                    Pakistan
+                                </a>
+                                <a href="{{ url_for('download_snp', snp_id=result.snp_id) }}?country=bangladesh" class="download-button">
+                                    Bangladesh
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pathway Information Card -->
+    <div class="card pathway-section">
+        <div class="card-header">
+            <h3>Pathway Information</h3>
+        </div>
+        <div class="card-body">
+            {% for result in results %}
+                {% if result.pathways %}
+                    <div class="snp-pathways">
+                        <h4>Pathways for SNP: {{ result.snp_id }}</h4>
+                        <ul>
+                            {% for pathway in result.pathways %}
+                                <li><strong>{{ pathway.pathway_id }}</strong> - {{ pathway.pathway_name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="snp-pathways">
+                        <h4>Pathways for SNP: {{ result.snp_id }}</h4>
+                        <p>No pathway data available.</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- GO Term Information Card -->
+    <div class="card go-term-section">
+        <div class="card-header">
+            <h3>GO Term Information</h3>
+        </div>
+        <div class="card-body">
+            {% for result in results %}
+                {% set go_terms = get_go_terms(result.snp_id) %}
+                {% if go_terms %}
+                    <div class="snp-go">
+                        <h4>GO Terms for SNP: {{ result.snp_id }}</h4>
+                        <ul>
+                            {% for term in go_terms %}
+                                <li><strong>{{ term }}</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="snp-go">
+                        <h4>GO Terms for SNP: {{ result.snp_id }}</h4>
+                        <p>No GO Term data available.</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Summary Statistics Card -->
+    <div class="card summary-statistics">
+        <div class="card-header">
+            <h3>Summary Statistics</h3>
+        </div>
+        <div class="card-body">
+            {% for result in results %}
+                <div class="statistics">
+                    <h4>SNP: {{ result.snp_id }}</h4>
+                    <p><strong>delta_af:</strong> {% if result.delta_af %}{{ result.delta_af|float|round(3) }}{% else %}-{% endif %}</p>
+                    <p><strong>daf_beb:</strong> {% if result.daf_beb %}{{ result.daf_beb|float|round(3) }}{% else %}-{% endif %}</p>
+                    <p><strong>daf_pjl:</strong> {% if result.daf_pjl %}{{ result.daf_pjl|float|round(3) }}{% else %}-{% endif %}</p>
+                    <p><strong>fst_beb:</strong> {% if result.fst_beb %}{{ result.fst_beb|float|round(3) }}{% else %}-{% endif %}</p>
+                    <p><strong>fst_pjl:</strong> {% if result.fst_pjl %}{{ result.fst_pjl|float|round(3) }}{% else %}-{% endif %}</p>
+                    {% if not (result.delta_af or result.daf_beb or result.daf_pjl or result.fst_beb or result.fst_pjl) %}
+                        <p>No summary statistics available for this SNP.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+        <p class="no-results">No results found for "<span class="query">{{ query }}</span>". Try another search.</p>
+    {% endif %}
+</section>
+
+<!-- Enhanced CSS Styling -->
+<style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+    }
+    .search-container {
+        margin: 30px auto;
+        padding: 30px;
+        max-width: 1200px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .header h2 {
+        text-align: center;
+        font-size: 28px;
+        color: #003366;
+        margin-bottom: 20px;
+    }
+    .query {
+        color: #0056b3;
+        font-weight: 700;
+    }
+    .no-results {
+        text-align: center;
+        color: #d9534f;
+        font-size: 20px;
+        margin-top: 20px;
+    }
+    .card {
+        margin: 20px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f7f7f7;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .card-header {
+        background: linear-gradient(135deg, #0056b3, #003366);
+        padding: 15px 20px;
+        color: #fff;
+    }
+    .card-header h3 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 500;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .styled-table th, .styled-table td {
+        padding: 12px 15px;
+        text-align: center;
+    }
+    .styled-table th {
+        background-color: #0056b3;
+        color: #fff;
+        font-weight: 600;
+    }
+    .styled-table tr {
+        border-bottom: 1px solid #dddddd;
+    }
+    .styled-table tr:nth-child(even) {
+        background-color: #f3f3f3;
+    }
+    .styled-table tr:hover {
+        background-color: #e9f5ff;
+        transition: background-color 0.3s ease;
+    }
+    .snp-pathways, .snp-go, .statistics {
+        margin: 15px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+    }
+    .snp-pathways h4, .snp-go h4, .statistics h4 {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #003366;
+    }
+    .snp-pathways ul, .snp-go ul {
+        list-style: none;
+        padding-left: 20px;
+    }
+    .snp-pathways ul li, .snp-go ul li {
+        margin: 5px 0;
+        position: relative;
+        padding-left: 15px;
+    }
+    .snp-pathways ul li::before, .snp-go ul li::before {
+        content: "➤";
+        position: absolute;
+        left: 0;
+        color: #0056b3;
+    }
+    .statistics p {
+        margin: 8px 0;
+        font-size: 16px;
+        color: #333;
+    }
+    .download-button {
+        background-color: #0056b3;
+        color: white;
+        padding: 5px 10px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .download-button:hover {
+        background-color: #003366;
+    }
+    .download-options {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    @media (max-width: 768px) {
+        .styled-table th, .styled-table td {
+            font-size: 14px;
+            padding: 8px;
+        }
+        .card-header h3 {
+            font-size: 18px;
+        }
+        .header h2 {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<script>
+    function toggleDownloadOptions(snpId) {
+        var options = document.getElementById('options-' + snpId);
+        if(options.style.display === 'none' || options.style.display === ''){
+            options.style.display = 'flex';
+        } else {
+            options.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

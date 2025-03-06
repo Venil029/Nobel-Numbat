@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Summary Stats View - Nobel Numbat{% endblock %}
+{% block content %}
+<section class="summary-stats">
+    <h1>Summary Statistics: DAF and ΔAF Visualisation</h1>
+    <p>Explore the visual summary of Derived Allele Frequency (DAF) for BEB and PJL populations, the absolute difference in allele frequencies (ΔAF) across chromosomes, and the mean FST comparison.</p>
+    
+    <div class="plot-section">
+        <h2>Histogram: Mean DAF_BEB and DAF_PJL by Chromosome</h2>
+        <img src="data:image/png;base64,{{ histogram_plot }}" alt="DAF Histogram">
+    </div>
+    
+    <div class="plot-section">
+        <h2>FST Comparison (Mean)</h2>
+        <img src="data:image/png;base64,{{ fst_comparison_plot }}" alt="FST Comparison Plot">
+    </div>
+    
+    <div class="plot-section">
+        <h2>Bar Chart: Mean ΔAF by Chromosome</h2>
+        <img src="data:image/png;base64,{{ delta_af_plot }}" alt="ΔAF Bar Chart">
+    </div>
+    
+    <div class="plot-section">
+        <h2>p-values Grouped by Chromosome</h2>
+        <img src="data:image/png;base64,{{ pvalue_plot }}" alt="p-value Plot">
+    </div>
+</section>
+
+<style>
+    .summary-stats {
+        background: rgba(255, 255, 255, 0.98);
+        padding: 40px;
+        border-radius: 15px;
+        margin: 40px auto;
+        width: 95%;
+        max-width: 1200px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .summary-stats h1 {
+        font-size: 2.8em;
+        margin-bottom: 20px;
+        color: #003366;
+    }
+    .summary-stats p {
+        font-size: 1.2em;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    .plot-section {
+        margin: 30px 0;
+    }
+    .plot-section h2 {
+        font-size: 1.8em;
+        margin-bottom: 10px;
+        color: #0056b3;
+    }
+    .plot-section img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+    .plot-section img:hover {
+        transform: scale(1.02);
+    }
+    @media (max-width: 768px) {
+        .summary-stats h1 {
+            font-size: 2.2em;
+        }
+        .summary-stats p {
+            font-size: 1em;
+        }
+        .plot-section h2 {
+            font-size: 1.5em;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Data Options - Nobel Numbat{% endblock %}
+{% block content %}
+<section class="data-options">
+    <h2>Data Visualisation</h2>
+    <p>Choose a visualisation view to explore the underlying data insights:</p>
+    <div class="options-container">
+        <div class="option-box">
+            <a href="{{ url_for('delta_af_view') }}">
+                <h3>Δ AF View</h3>
+                <p>Visualise the changes in allele frequencies with interactive charts and detailed statistics.</p>
+            </a>
+        </div>
+        <div class="option-box">
+            <a href="{{ url_for('beb_pjl_view') }}">
+                <h3>DAF View</h3>
+                <p>Derived Allele Frequency Comparision of Beb and Pjl.</p>
+            </a>
+        </div>
+        <div class="option-box">
+            <a href="{{ url_for('fst_view') }}">
+                <h3>FST view</h3>
+                <p>Explore Fixation index and visual representations for further insights.</p>
+            </a>
+        </div>
+        <div class="option-box">
+            <a href="{{ url_for('summary_stats_view') }}">
+                <h3>Summary Stats View</h3>
+                <p>Review overall summary statistics with visual summaries and key insights.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .data-options {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px 50px;
+        border-radius: 15px;
+        margin: 40px auto;
+        width: 90%;
+        max-width: 1200px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .data-options h2 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        color: #003366;
+    }
+    .data-options p {
+        font-size: 1.2em;
+        color: #333;
+        margin-bottom: 30px;
+    }
+    .options-container {
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    .option-box {
+        flex: 1 1 300px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .option-box a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        padding: 20px;
+        height: 100%;
+    }
+    .option-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .option-box h3 {
+        font-size: 1.8em;
+        margin-bottom: 10px;
+        color: #0056b3;
+    }
+    .option-box p {
+        font-size: 1em;
+        color: #555;
+    }
+</style>
+{% endblock %}

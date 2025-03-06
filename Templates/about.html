@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Nobel Numbat{% endblock %}
+
+{% block content %}
+<section class="about-container">
+    <h1>About This Website</h1>
+    
+    <p>
+        Welcome to <strong>Nobel Numbat</strong>! This website is designed to provide users 
+        with insights into genetic data associated with Type 2 Diabetes, specifically within 
+        the South Asian population.
+    </p>
+
+    <p>
+        This project focuses on combining genetic association studies with population genomic data 
+        to help users understand the genetic basis of Type 2 Diabetes susceptibility.
+    </p>
+
+    <p>
+        Here you can retrieve information on:
+    </p>
+
+    <ul>
+        <li>Single Nucleotide Polymorphisms (SNPs) associated with T2D.</li>
+        <li>Mapped genes, genomic coordinates, and population statistics.</li>
+        <li>Visualizations for genomic regions of interest and machine learning techniques.</li>
+        <li>Downloadable reports and data for further analysis.</li>
+    </ul>
+
+    <p>
+        This project was developed as part of the MSc Bioinformatics Software Development 
+        Group Project.
+    </p>
+</section>
+
+<!-- Inline Styling for the About Page -->
+<style>
+    .about-container {
+        margin: 40px auto;
+        max-width: 800px;
+        padding: 30px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+    }
+
+    .about-container h1 {
+        text-align: center;
+        font-size: 28px;
+        color: #003366;
+        margin-bottom: 20px;
+    }
+
+    .about-container p {
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    .about-container ul {
+        list-style: disc;
+        margin-left: 40px;
+        margin-bottom: 15px;
+    }
+
+    .about-container li {
+        margin: 8px 0;
+    }
+</style>
+{% endblock %}

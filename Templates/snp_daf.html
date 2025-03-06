@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}DAF Visualization{% endblock %}
+
+{% block content %}
+<div class="container" style="margin: 20px auto; max-width: 900px; background: white; color: black; padding: 20px; border-radius: 10px;">
+  <h2 style="text-align: center;">DAF Visualization</h2>
+  
+  <!-- Chromosome Selection -->
+  <div style="margin-bottom: 20px; text-align: center;">
+    <label for="chromosome-select">Select Chromosome:</label>
+    <select id="chromosome-select" style="padding: 5px; font-size: 16px;">
+      {% for i in range(1, 23) %}
+        <option value="{{ i }}">Chromosome {{ i }}</option>
+      {% endfor %}
+      <option value="X">Chromosome X</option>
+      <option value="Y">Chromosome Y</option>
+    </select>
+  </div>
+  
+  <!-- Chart Canvas -->
+  <div style="position: relative; height: 400px; width: 100%; margin-bottom: 20px;">
+    <canvas id="dafChart"></canvas>
+  </div>
+  
+  <!-- Tooltip Container -->
+  <div id="tooltip" style="position: absolute; opacity: 0; background: rgba(255,255,255,0.9); border: 1px solid #ccc; padding: 10px; pointer-events: none;"></div>
+  
+  <!-- Summary Statistics -->
+  <div id="summary-content" style="margin-top: 20px;"></div>
+  
+  <!-- Top Differences Table -->
+  <div id="top-differences" style="margin-top: 20px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include your custom DAF visualization JavaScript -->
+<script src="{{ url_for('static', filename='js/your_daf_script.js') }}"></script>
+{% endblock %}
