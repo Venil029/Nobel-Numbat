@@ -1,16 +1,18 @@
-# fst_plotting.py
+# fst_plotting.py 
+#import matplotlib for creating plots, io to handle in-memory image files, base64 to encode images and pandas for handling data
 import matplotlib.pyplot as plt
 import io
 import base64
 import pandas as pd
 
+#function to create bar plot comparing FST values for BEB and PJL population
 def plot_fst_comparison(df):
     """
     Plots a bar graph comparing mean FST values for PJL and BEB populations by chromosome.
     """
     plt.figure(figsize=(12, 6))
     x = df['Chromosome']
-    width = 0.35  # Width of the bars
+    width = 0.35  
 
     # Plot PJL data
     plt.bar(x - width/2, df['PJL_Mean_FST'], width, color='blue', alpha=0.5, label='PJL')
@@ -18,19 +20,20 @@ def plot_fst_comparison(df):
     # Plot BEB data
     plt.bar(x + width/2, df['BEB_Mean_FST'], width, color='orange', alpha=0.5, label='BEB')
 
-    plt.xlabel("Chromosome")
-    plt.ylabel("Mean FST")
-    plt.title("Comparison of Mean FST Values for PJL and BEB Populations by Chromosome")
-    plt.legend(title="Population")
-    plt.xticks(df['Chromosome'])
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+    plt.xlabel("Chromosome")#x-axis label
+    plt.ylabel("Mean FST")#y-axis label
+    plt.title("Comparison of Mean FST Values for PJL and BEB Populations by Chromosome")#title of plot
+    plt.legend(title="Population")#legend to differentiate between the two populations
+    plt.xticks(df['Chromosome'])#tick labels define 
+    plt.grid(True, axis='y', linestyle='--', alpha=0.7)#add grid in background for readability
     
-    img = io.BytesIO()
+    img = io.BytesIO()#save the plot to an in memory buffer as PNG image
     plt.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
     plt.close()
     return base64.b64encode(img.getvalue()).decode('utf8')
 
+#function to generate a dataframe containing FST data values for chromosomes 1-22
 def get_fst_data():
     """
     Returns a DataFrame with hard-coded FST data for PJL and BEB populations.
@@ -59,4 +62,4 @@ def get_fst_data():
         {"Chromosome": 21, "PJL_Mean_FST": 0.0155, "BEB_Mean_FST": 0.0181},
         {"Chromosome": 22, "PJL_Mean_FST": 0.0168, "BEB_Mean_FST": 0.0198}
     ]
-    return pd.DataFrame(data)
+    return pd.DataFrame(data) #convert the list into pandas dataframe 
