@@ -9,4 +9,4 @@ Instance: Contains the code needed to run and download the SQL database.
 
 BackEnd : Contains the heart of the software to run the website.
 
-static: Contains style.css format for the design of the page.
+static: Contains style.css format for the design of the page and also the java script file which is used for visualisation.
