@@ -1,0 +1,259 @@
+///////////////////////////////////////////////////////////////
+// your_daf_script.js (Updated)
+///////////////////////////////////////////////////////////////
+
+// Global variables
+let chart;
+// Updated colors: BEB is now bright red and PJL is now bright blue.
+const colors = {
+    beb: 'rgba(255, 0, 0, 1)',       // bright red for BEB
+    pjl: 'rgba(0, 0, 255, 1)',       // bright blue for PJL
+    bebLight: 'rgba(255, 0, 0, 0.2)',  // light red for BEB points
+    pjlLight: 'rgba(0, 0, 255, 0.2)'   // light blue for PJL points
+};
+
+// Initialize the page when the DOM content is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const chromosomeSelect = document.getElementById('chromosome-select');
+    const selectedChromosome = chromosomeSelect.value;
+    
+    // Load initial data for the selected chromosome
+    loadChromosomeData(selectedChromosome);
+    
+    // Listen for changes in chromosome selection
+    chromosomeSelect.addEventListener('change', function() {
+        loadChromosomeData(this.value);
+    });
+});
+
+// Load data for the selected chromosome from the API endpoint
+function loadChromosomeData(chromosome) {
+    fetch(`/api/daf-data/${chromosome}`)
+        .then(response => response.json())
+        .then(data => {
+            updateChart(data.data);
+            updateSummary(data.summary);
+            updateTopDifferences(data.top_differences);
+        })
+        .catch(error => console.error('Error loading data:', error));
+}
+
+// Create or update the scatter chart using Chart.js
+function updateChart(data) {
+    const ctx = document.getElementById('dafChart').getContext('2d');
+    
+    // Prepare data for the scatter chart
+    const chartData = {
+        datasets: [
+            {
+                label: 'BEB Population',
+                data: data.map(item => ({
+                    x: item.Position,
+                    y: item.DAF_BEB,
+                    snpId: item.SNP_ID,
+                    riskAllele: item.Risk_Allele,
+                    bebDaf: item.DAF_BEB,
+                    pjlDaf: item.DAF_PJL,
+                    difference: item.difference,
+                    higherIn: item.higher_in
+                })),
+                borderColor: colors.beb,
+                backgroundColor: colors.bebLight,
+                pointRadius: 6,           // increased for better visibility
+                pointHoverRadius: 8,
+                showLine: false           // no connecting line for scatter plot
+            },
+            {
+                label: 'PJL Population',
+                data: data.map(item => ({
+                    x: item.Position,
+                    y: item.DAF_PJL,
+                    snpId: item.SNP_ID,
+                    riskAllele: item.Risk_Allele,
+                    bebDaf: item.DAF_BEB,
+                    pjlDaf: item.DAF_PJL,
+                    difference: item.difference,
+                    higherIn: item.higher_in
+                })),
+                borderColor: colors.pjl,
+                backgroundColor: colors.pjlLight,
+                pointRadius: 6,           // increased for better visibility
+                pointHoverRadius: 8,
+                showLine: false
+            }
+        ]
+    };
+    
+    // Destroy previous chart instance if it exists
+    if (chart) {
+        chart.destroy();
+    }
+    
+    // Create a new scatter chart instance
+    chart = new Chart(ctx, {
+        type: 'scatter',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Position'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return (value / 1000000).toFixed(2) + 'Mb';
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 1,
+                    title: {
+                        display: true,
+                        text: 'DAF Score'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: false,
+                    external: externalTooltipHandler
+                },
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+}
+
+// Custom tooltip handler for displaying SNP details
+function externalTooltipHandler(context) {
+    const { chart, tooltip } = context;
+    const tooltipEl = document.getElementById('tooltip');
+
+    // Hide tooltip if not active
+    if (tooltip.opacity === 0) {
+        tooltipEl.style.opacity = 0;
+        return;
+    }
+
+    // Set tooltip content using data from the hovered data point
+    if (tooltip.body) {
+        const dataPoint = tooltip.dataPoints[0].raw;
+        let diffClass = dataPoint.difference > 0.1 ? 'text-red-600 font-bold' : 'text-gray-700';
+        
+        tooltipEl.innerHTML = `
+            <div>
+                <p class="font-bold">${dataPoint.snpId}</p>
+                <p>Position: ${(dataPoint.x / 1000000).toFixed(2)}Mb</p>
+                <p>Risk Allele: ${dataPoint.riskAllele}</p>
+                <p>BEB DAF: ${dataPoint.bebDaf.toFixed(3)}</p>
+                <p>PJL DAF: ${dataPoint.pjlDaf.toFixed(3)}</p>
+                <p class="${diffClass}">
+                    Difference: ${dataPoint.difference.toFixed(3)}
+                    ${dataPoint.difference > 0.05 ? ' (Significant)' : ''}
+                </p>
+                <p>Higher in: ${dataPoint.higherIn}</p>
+            </div>
+        `;
+    }
+
+    // Position the tooltip relative to the chart
+    const position = chart.canvas.getBoundingClientRect();
+    tooltipEl.style.opacity = 1;
+    tooltipEl.style.left = position.left + window.pageXOffset + tooltip.caretX + 'px';
+    tooltipEl.style.top = position.top + window.pageYOffset + tooltip.caretY + 'px';
+}
+
+// Update summary statistics on the page using the API summary object
+function updateSummary(summary) {
+    const summaryContent = document.getElementById('summary-content');
+    // Insert summary stats into a styled table
+    summaryContent.innerHTML = `
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th colspan="2">Summary Statistics</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Number of SNPs</strong></td>
+                    <td>${summary.count}</td>
+                </tr>
+                <tr>
+                    <td><strong>Average DAF - BEB</strong></td>
+                    <td>${summary.avg_daf_beb.toFixed(3)}</td>
+                </tr>
+                <tr>
+                    <td><strong>Average DAF - PJL</strong></td>
+                    <td>${summary.avg_daf_pjl.toFixed(3)}</td>
+                </tr>
+                <tr>
+                    <td><strong>Mean Difference</strong></td>
+                    <td>${summary.mean_difference.toFixed(3)}</td>
+                </tr>
+                <tr>
+                    <td><strong>SNPs with higher DAF in BEB</strong></td>
+                    <td>${summary.higher_in_beb}</td>
+                </tr>
+                <tr>
+                    <td><strong>SNPs with higher DAF in PJL</strong></td>
+                    <td>${summary.higher_in_pjl}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+}
+
+// Update the table displaying top differences between populations
+function updateTopDifferences(topDiffs) {
+    const topDiffContent = document.getElementById('top-differences');
+    
+    if (topDiffs.length > 0) {
+        let tableHTML = `
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>SNP ID</th>
+                        <th>Risk Allele</th>
+                        <th style="text-align:right;">BEB</th>
+                        <th style="text-align:right;">PJL</th>
+                        <th style="text-align:right;">Difference</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        topDiffs.forEach((snp) => {
+            const diffStyle = snp.difference > 0.1 ? 'font-weight: bold; color: red;' : '';
+            tableHTML += `
+                <tr>
+                    <td>${snp.SNP_ID}</td>
+                    <td>${snp.Risk_Allele}</td>
+                    <td style="text-align:right;">${snp.DAF_BEB.toFixed(3)}</td>
+                    <td style="text-align:right;">${snp.DAF_PJL.toFixed(3)}</td>
+                    <td style="text-align:right; ${diffStyle}">${snp.difference.toFixed(3)}</td>
+                </tr>
+            `;
+        });
+        
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+        
+        topDiffContent.innerHTML = tableHTML;
+    } else {
+        topDiffContent.innerHTML = '<p>No data available for selected chromosome.</p>';
+    }
+}
