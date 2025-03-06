@@ -1,5 +1,5 @@
-# Welcome to Nobel-Numbat
-Code Repository for the bioinformatic software developed by Nobel Numbats based on type 2 diabetes in the South Asian population.
+# Welcome to Noble-Numbat
+Code Repository for the bioinformatic software developed by Noble Numbats based on type 2 diabetes in the South Asian population.
 # Description of Content 
 Templates : Contains HTML code needed for the front end of the website for each subpage.
 
