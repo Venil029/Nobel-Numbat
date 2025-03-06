@@ -3,7 +3,7 @@
 import sqlite3
 
 # Connect to SQLite database (or create it if it doesn't exist)
-conn = sqlite3.connect("sql9.db")
+conn = sqlite3.connect("genetics.db")
 cursor = conn.cursor()
 cursor.execute("PRAGMA foreign_keys = ON;")
 
