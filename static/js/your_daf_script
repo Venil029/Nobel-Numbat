@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////
-// your_daf_script.js (Updated)
+// your_daf_script.js
 ///////////////////////////////////////////////////////////////
 
 // Global variables
 let chart;
-// Updated colors: BEB is now bright red and PJL is now bright blue.
+
 const colors = {
     beb: 'rgba(255, 0, 0, 1)',       // bright red for BEB
     pjl: 'rgba(0, 0, 255, 1)',       // bright blue for PJL
@@ -59,9 +59,9 @@ function updateChart(data) {
                 })),
                 borderColor: colors.beb,
                 backgroundColor: colors.bebLight,
-                pointRadius: 6,           // increased for better visibility
+                pointRadius: 6,           
                 pointHoverRadius: 8,
-                showLine: false           // no connecting line for scatter plot
+                showLine: false           
             },
             {
                 label: 'PJL Population',
@@ -77,7 +77,7 @@ function updateChart(data) {
                 })),
                 borderColor: colors.pjl,
                 backgroundColor: colors.pjlLight,
-                pointRadius: 6,           // increased for better visibility
+                pointRadius: 6,          
                 pointHoverRadius: 8,
                 showLine: false
             }
