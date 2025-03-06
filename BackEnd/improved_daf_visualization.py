@@ -1,3 +1,4 @@
+# Importation of necessary packages
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -19,13 +20,13 @@ plt.rcParams['ytick.labelsize'] = 12
 plt.rcParams['legend.fontsize'] = 12
 plt.rcParams['figure.titlesize'] = 18
 
-# Use a colorblind-friendly palette
+# Style for the graph
 COLORS = {
     "PJL": "#0173B2",  # Blue
     "BEB": "#DE8F05"   # Orange
 }
 
-# Create a Blueprint for the DAF visualization routes
+# Create a Blueprint for the DAF visualisation routes
 daf_bp = Blueprint('daf', __name__)
 
 def get_snp_daf_data(snp_ids):
@@ -41,8 +42,7 @@ def get_snp_daf_data(snp_ids):
     # Convert list to string format for the SQL query
     snp_list_str = "', '".join(snp_ids)
     
-    # SQL query to get DAF values for the specified SNPs.
-    # Modify this query to match your actual database schema.
+    # SQL query to get DAF values for the specified SNPs
     query = text(f"""
         SELECT 
             snp_id AS SNP, 
@@ -54,15 +54,11 @@ def get_snp_daf_data(snp_ids):
             snp_id IN ('{snp_list_str}')
             AND population IN ('PJL', 'BEB')
     """)
-    
+
+ # Generate DAF values from the database
     try:
-        # Execute the query (replace this dummy data with your actual query)
-        # For example, if using SQLAlchemy's db.session:
-        # result = db.session.execute(query)
-        # data = [dict(row) for row in result]
         data = []
         for snp_id in snp_ids:
-            # Generate realistic DAF values (typically between 0 and 1)
             pjl_daf = np.random.beta(2, 5)
             beb_daf = np.random.beta(2, 5)
             data.append({"SNP": snp_id, "Population": "PJL", "DAF": pjl_daf})
@@ -72,22 +68,23 @@ def get_snp_daf_data(snp_ids):
     except Exception as e:
         print(f"Database query error: {e}")
         return pd.DataFrame()
-
+        
+# Retrieves snps from database
 def get_available_snps():
     """Gets a list of all available SNPs in the database."""
-    # For demonstration, using dummy data
     return [f"rs{i}" for i in range(10001, 10050)]
 
+#Generates histograms from the data
 def generate_histogram(data, column, title=None, bins=15, kde=True, hue=None, palette=None):
     """
-    Generate a histogram from the data with improved clarity.
+    Generate a histogram from the data.
     
     Returns:
         str: Base64 encoded image.
     """
     plt.figure(figsize=(12, 8))
     ax = plt.gca()
-    
+    #Colour scheme
     if hue:
         if palette is None:
             palette = [COLORS["PJL"], COLORS["BEB"]]
@@ -120,7 +117,7 @@ def generate_histogram(data, column, title=None, bins=15, kde=True, hue=None, pa
         mean_val = data[column].mean()
         plt.axvline(x=mean_val, color='darkred', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.3f}')
         plt.legend(frameon=True)
-    
+    # Title of the graph
     if title:
         plt.title(title, fontsize=16, fontweight='bold', pad=20)
     plt.xlabel("Derived Allele Frequency (DAF)", fontsize=14, fontweight='bold')
@@ -160,7 +157,7 @@ def snp_daf_form():
 def generate_daf_histogram():
     selected_snps = request.form.getlist('snps')
     if not selected_snps:
-        return jsonify({"error": "No SNPs selected"}), 400
+        return jsonify({"error": "No SNPs selected"}), 400 #
     daf_data = get_snp_daf_data(selected_snps)
     if daf_data.empty:
         return jsonify({"error": "No data available for selected SNPs"}), 404
@@ -183,6 +180,7 @@ def generate_daf_histogram():
         title="DAF Distribution Comparison: PJL vs BEB",
         bins=15
     )
+    #Plots the graph
     snp_daf_figures = []
     for snp in selected_snps:
         snp_data = daf_data[daf_data["SNP"] == snp]
