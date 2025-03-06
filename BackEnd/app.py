@@ -1,3 +1,4 @@
+# ------------------ Import all necessary packages ------------------
 import os
 import pandas as pd
 import re
@@ -11,7 +12,7 @@ from flask import Flask, render_template, render_template_string, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from sqlalchemy import text  # Import text from SQLAlchemy
+from sqlalchemy import text  
 from sqlalchemy.orm import joinedload
 
 # Import FST plotting functions from a separate module
@@ -31,28 +32,26 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
-# ------------------ DATABASE MODELS ------------------
+# ------------------ Database model ------------------
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-
-# Existing association table for pathways
+# ------------------ Existing association table for pathways ------------------
 snp_pathway_table = db.Table('snp_pathway',
     db.Column('snp_id', db.String, db.ForeignKey('snp.snp_id')),
     db.Column('pathway_id', db.String, db.ForeignKey('pathway.pathway_id'))
 )
-
-# ---------- NEW: Association table for SNPs and GO Terms ----------
+# ---------- Association table for SNPs and GO Terms ----------
 snp_go_table = db.Table('snp_go',
     db.Column('snp_id', db.String, db.ForeignKey('snp.snp_id')),
     db.Column('go_id', db.String, db.ForeignKey('go_term.go_id'))
 )
-
+# ---------- Table name is "snp" in lowercase and Gene information stored here  --------------
 class GeneticData(db.Model):
-    __tablename__ = "snp"  # Table name is "snp" in lowercase
+    __tablename__ = "snp"  
     snp_id = db.Column(db.String, primary_key=True)
     risk_allele = db.Column(db.String)
     chromosome = db.Column(db.String)
@@ -61,7 +60,7 @@ class GeneticData(db.Model):
     odds_ratio = db.Column(db.Float)
     ci = db.Column(db.String)
     trait = db.Column(db.String)
-    mapped_gene = db.Column(db.String)  # Gene information stored here
+    mapped_gene = db.Column(db.String)  
     study_accession = db.Column(db.String)
     pubmed_id = db.Column(db.String)
     beb = db.Column(db.String)
@@ -74,26 +73,28 @@ class GeneticData(db.Model):
     phenotype = db.Column(db.String)
     t2dkp_p_value = db.Column(db.Float)
     beta = db.Column(db.Float)
-    fst_beb = db.Column(db.Float)  # New column for fst_beb
-    fst_pjl = db.Column(db.Float)  # New column for fst_pjl
+    fst_beb = db.Column(db.Float)  
+    fst_pjl = db.Column(db.Float)  
     
-    # Relationship for pathway info (existing)
+    # ---------- Relationship for pathways ----------
     pathways = db.relationship('Pathway', secondary=snp_pathway_table, backref="associated_snps", lazy=True)
-    # ---------- NEW: Relationship for GO Terms ----------
+    # ---------- Relationship for GO Terms ----------
     go_terms = db.relationship('GOTerm', secondary=snp_go_table, backref="associated_snps", lazy=True)
 
+
+# ---------- Pathway model for database ----------
 class Pathway(db.Model):
     __tablename__ = "pathway"
     pathway_id = db.Column(db.String, primary_key=True)
     pathway_name = db.Column(db.String)
 
-# ---------- NEW: GOTerm model for GO Terms ----------
+# ---------- GOTerm model for GO Terms ----------
 class GOTerm(db.Model):
     __tablename__ = "go_term"
     go_id = db.Column(db.String(50), primary_key=True)
     go_term = db.Column(db.String(100), nullable=False)
 
-# ------------------ HELPER FUNCTION FOR GO TERM INFO ------------------
+# ------------------ Helper function for GO term information ------------------
 def get_go_terms(snp_id):
     """
     Returns a list of GO term descriptions for the given snp_id by joining the
@@ -108,26 +109,24 @@ def get_go_terms(snp_id):
     result = db.session.execute(stmt, {"snp_id": snp_id}).fetchall()
     return [row[0] for row in result]
 
-# Register the helper as a template global so it can be used in Jinja templates.
+# ---------- Register the helper as a template global so it can be used in Jinja templates ---------------
 app.jinja_env.globals.update(get_go_terms=get_go_terms)
 
-# ------------------ USER LOADER ------------------
+# ------------------ Loads the user ------------------
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ------------------ ROUTES ------------------
-
-# Home page now contains a search form for SNP ID only.
+# ------------------ app routes ------------------
 @app.route('/')
 def home():
     return render_template('home.html')
-
+# ------------------ allows user to create a profile ------------------
 @app.route('/profile')
 @login_required
 def profile():
     return render_template('profile.html')
-
+# ------------------ allows user to log out  ------------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -140,7 +139,7 @@ def login():
             return redirect(url_for('home'))
         flash(' Invalid email or password.', 'danger')
     return render_template('login.html')
-
+# ------------------ allows user to register  ------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -158,7 +157,7 @@ def register():
         flash(' Your account has been created! Please log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
-
+# ------------------ allows user to log out ------------------
 @app.route('/logout')
 @login_required
 def logout():
@@ -166,8 +165,7 @@ def logout():
     flash(' You have logged out!', 'info')
     return redirect(url_for('home'))
 
-# ------------------ SEARCH ROUTES ------------------
-# The /search route now searches only by SNP ID.
+# ------------------ code for the search route ------------------
 @app.route('/search', methods=['GET'])
 def search():
     query = request.args.get('query', '').strip()
@@ -181,6 +179,8 @@ def search():
         else:
             flash(f" No results found for '{query}'.", "danger")
     return render_template('search_results.html', results=results, query=query)
+    
+# ------------------ contains app routes for connection of database ------------------
 
 @app.route('/genetic_data', methods=['GET'], endpoint='genetic_data_search')
 def genetic_data_search():
@@ -206,28 +206,28 @@ def genetic_data_search():
         else:
             flash(f" No results found for '{query}'.", "danger")
     return render_template('genetic_data.html', results=results, query=query)
-
+# ------------------ connects about subpage ------------------
 @app.route('/about')
 def about():
     return render_template('about.html')
-
+# ------------------ connects populations subpage ------------------
 @app.route('/populations')
 def populations():
     return render_template('populations.html')
-
+# ------------------ connects information on the bangladeshi population to the populations page ------------------
 @app.route('/populations/bangladesh')
 def bangladesh():
     return render_template('bangladesh.html')
-
+# ------------------ connects information on the pakistani population to the populations page ------------------
 @app.route('/populations/pakistan')
 def pakistan():
     return render_template('pakistan.html')
-
+# ------------------ connects the data visuliation page ------------------
 @app.route('/data_options')
 def data_options():
     return render_template('data_options.html')
 
-# ------------------ DELTA AF VISUALIZATION ROUTE ------------------
+# ------------------ Delta allele frequency visualisation route ------------------
 @app.route('/delta_af')
 def delta_af_view():
     try:
@@ -263,12 +263,12 @@ def delta_af_view():
     boxplot_html = boxplot_fig.to_html(full_html=False)
     return render_template("delta_af_viz.html", manhattan_html=manhattan_html, boxplot_html=boxplot_html)
 
-# ------------------ BEB/PJL (DAF Comparison) VISUALISATION ROUTE ------------------
+# ------------------ BEB/PJL (DAF Comparison) visualisation route ------------------
 @app.route('/beb_pjl')
 def beb_pjl_view():
     return render_template('beb_pjl_view.html')
 
-# ------------------ FST VISUALISATION ROUTE ------------------
+# ------------------ FST visualisation route ------------------
 @app.route('/fst_view')
 def fst_view():
     try:
@@ -308,7 +308,7 @@ def fst_view():
     fst_box_html = fst_box_fig.to_html(full_html=False)
     return render_template("fst_view.html", fst_scatter_html=fst_scatter_html, fst_box_html=fst_box_html)
 
-# ------------------ SUMMARY STATS ROUTE ------------------
+# ------------------ summary stats visualisation ------------------
 @app.route('/summary_stats')
 def summary_stats_view():
     import Flask_derive_delta as fdd
@@ -326,10 +326,10 @@ def summary_stats_view():
                            pvalue_plot=pvalue_plot,
                            fst_comparison_plot=fst_comparison_plot)
 
-# ------------------ FST API ENDPOINTS ------------------
+# ------------------ FST API endpoints ------------------
 @app.route('/api/populations')
 def api_populations():
-    # For FST visualization, we support BEB and PJL
+    # FST visualisation for BEB and PJL
     return jsonify(["BEB", "PJL"])
 
 @app.route('/api/snps/<population>')
@@ -407,7 +407,7 @@ def api_fst_data():
     result_list = sorted(result_list, key=lambda x: x["FST"], reverse=True)
     return jsonify(result_list)
 
-# ------------------ DAF API ROUTE ------------------
+# ------------------ DAF API route ------------------
 @app.route('/api/daf-data/<chromosome>', methods=['GET'])
 def api_daf_data(chromosome):
     results = GeneticData.query.filter_by(chromosome=chromosome).all()
@@ -439,7 +439,7 @@ def api_daf_data(chromosome):
     top_differences = df_api.sort_values(by='difference', ascending=False).head(5).to_dict(orient='records')
     return jsonify({"data": data_list, "summary": summary, "top_differences": top_differences})
 
-# ------------------ DOWNLOAD ROUTES ------------------
+# ------------------ allows user to download snps ------------------
 @app.route('/download/<snp_id>')
 def download_snp(snp_id):
     snp = GeneticData.query.get(snp_id)
@@ -599,13 +599,13 @@ def init_db():
         db.create_all()
     return " Database initialized successfully!"
 
-# ---------- NEW ROUTE FOR FST VISUALIZATION TOOL ----------
+# ---------- new route for FST visualisation ----------
 @app.route('/fst_tool')
 def fst_tool():
     # Ensure that your fst.html is in the templates/ folder.
     return render_template('fst.html')
 
-# ---------- NEW ROUTE TO SHOW SNP_GO COLUMN INFO ----------
+# ---------- new route for SNP_GO column information ----------
 @app.route('/snp_go_columns')
 def snp_go_columns():
     """
@@ -616,7 +616,7 @@ def snp_go_columns():
     columns = inspector.get_columns('snp_go')
     return jsonify(columns)
 
-# ---------- DEFAULT ROUTE (if needed) ----------
+# ---------- default route----------
 @app.route('/default')
 def default_callable():
     query_list = ["fst_plot"]
