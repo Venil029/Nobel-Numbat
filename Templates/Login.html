@@ -1,1 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Nobel Numbat{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-box">
+    <h2>Login</h2>
+    <form action="{{ url_for('login') }}" method="POST" class="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" required class="form-control" placeholder="Enter your email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" required class="form-control" placeholder="Enter your password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Create one</a></p>
+  </div>
+</div>
+
+<style>
+  /* Center the login container vertically and horizontally */
+  .login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 20px;
+  }
+
+  /* Card-style login box */
+  .login-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .login-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #003366;
+  }
+
+  /* Form Group */
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  /* Primary Button */
+  .btn.btn-primary {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .btn.btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .login-box p {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .login-box a {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .login-box a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
 
