@@ -11,7 +11,7 @@ BackEnd : Contains the heart of the software to run the website.
 
 static: Contains style.css format for the design of the page and also the java script file which is used for visualisation.
 
-*The FLASK software is needed to produce the website*
+*The FLASK software is needed to produce the website:*
 
 https://flask.palletsprojects.com/en/stable/tutorial/
 
