@@ -21,4 +21,4 @@ https://flask.palletsprojects.com/en/stable/tutorial/
 3. Download the Templates, BackEnd and static files as this is needed to run the webiste.
 4. The app.py file contains the necessary code to route the app.
 5. Download the Instance file and run the software as this will provide you with the SQL database needed to intergrate into the webisite.
-6. Use code 'flask --app flaskr run --debug' to run the code on ternimal.
+6. Use code 'flask --app flaskr run --debug' to run the software on ternimal.
