@@ -16,9 +16,9 @@ static: Contains style.css format for the design of the page and also the java s
 https://flask.palletsprojects.com/en/stable/tutorial/
 
 # Instructions 
-1. Download FLASK
-2. Active the environment with the .venv directory
-3. Download the Templates, BackEnd and static files as this is needed to run the webiste
-4. The app.py file contains the necessary code to route the app
-5. Download the Instance file and run the software as this will provide you with the SQL database needed to intergrate into the webiste
-6. use 'flask --app flaskr run --debug' to run the code on ternimal
+1. Download FLASK.
+2. Active the environment with the .venv directory.
+3. Download the Templates, BackEnd and static files as this is needed to run the webiste.
+4. The app.py file contains the necessary code to route the app.
+5. Download the Instance file and run the software as this will provide you with the SQL database needed to intergrate into the webisite.
+6. use 'flask --app flaskr run --debug' to run the code on ternimal.
